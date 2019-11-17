@@ -58,7 +58,7 @@ foreach($a in $lista){
          if($local_proxy -eq $true){
             
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -SkipCertificateCheck -TimeoutSec 3
+            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 
          }else{
             $agent=$agents | Get-Random
             Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 
@@ -88,7 +88,7 @@ foreach($a in $lista){
        
         
      }
-     elseif ( $var -match "NXDOMAIN" -or $var -match "SERVFAIL") {
+     elseif ( $var -in ("NXDOMAIN","SERVFAIL")) {
 
       $i | Out-File -FilePath NXDOMAIN.txt -Append 
       
