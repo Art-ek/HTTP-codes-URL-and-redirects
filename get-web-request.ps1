@@ -88,7 +88,7 @@ foreach($a in $lista){
        
         
      }
-     elseif ( $var -match "NXDOMAIN" ) {
+     elseif ( $var -match "NXDOMAIN" -or $var -match "SERVFAIL") {
 
       $i | Out-File -FilePath NXDOMAIN.txt -Append 
       
@@ -99,15 +99,15 @@ foreach($a in $lista){
      } else {
         $i | Out-File -FilePath invalid_address.txt -Append
         
-        Write-host "response = $r [-] web server cannot be reach " -BackgroundColor Red -ForegroundColor Black
+        Write-host "response = $r [-] web server cannot be reached " -BackgroundColor Red -ForegroundColor Black
  
 
       }
              
      Write-host "server = $i"     
      Write-host "$var"       
-     write-host "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)"
-     write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"        
+     write-host "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
+     write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"   | Out-File -FilePath SCAN.LOG -Append     
      Write-host "=====================================" 
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
      Write-Output "server = $i" | Out-File -FilePath SCAN.LOG -Append  
