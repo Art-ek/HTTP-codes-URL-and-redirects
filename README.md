@@ -1,9 +1,9 @@
 # bulk-get-request
 
 Disclaimer, This is a very early beta version and has been created using .NET core and will only run on *NIX* like systems.
-It uses the "host" command which is not on Windows. Soon, probably will add some other function to replace it.
+It uses the "host" command which is not on Windows. Soon, probably will add a .NET function to replace it.
 
-Simple powershell script to perform a get request using invoke-webrequest cmdlet.
+Shortly it's a simple powershell script to perform a get request using invoke-webrequest cmdlet.
 It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser ;)
 Scripts has been optimised and will take few minutes not hours, depends how long is your list.
 What is this script for anyway?
@@ -13,6 +13,7 @@ SImply put If you have a list of different domains/subdomains/servers and you wo
 ++ features ++
 - added burp as a proxy so you can see all the GET requests in burp for further scans....
 - script follows redirections (5 by default - can be changed)
+- and most important the user-agent header will not show powershell as the agent but it randomly will use from(chrome,firefox/safari,IE,opera)
 - results will be saved it 4 different files ()
 
 Script has 2 parameters.
