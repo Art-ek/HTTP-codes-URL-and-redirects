@@ -76,10 +76,9 @@ foreach($a in $lista){
         
         $var= host $temp
      } else {
-     $var=host $i
+         $var=host $i
      }                                                                     
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
-     
      $r=$resp | Select-Object  -ExpandProperty statuscode
      if ($r -eq 200 -or $r -eq "Unauthorized" -or $r -eq "Forbidden")
      {
@@ -106,7 +105,9 @@ foreach($a in $lista){
       }
              
      Write-host "server = $i"     
-     Write-host "$var"                    
+     Write-host "$var"       
+     write-host "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)"
+     write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"        
      Write-host "=====================================" 
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
      Write-Output "server = $i" | Out-File -FilePath SCAN.LOG -Append  
