@@ -58,7 +58,7 @@ foreach($a in $lista){
          if($local_proxy -eq $true){
             
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 
+            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck
          }else{
             $agent=$agents | Get-Random
             Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 
@@ -70,6 +70,8 @@ foreach($a in $lista){
      {
         $_.exception.response
      }
+
+     
      if($i -match "https"){
         
         $temp=$i.substring(8,$i.Length-8)
@@ -77,41 +79,43 @@ foreach($a in $lista){
         $var= host $temp
      } else {
          $var=host $i
-     }                                                                     
+     }          
+                                                                
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
      $r=$resp | Select-Object  -ExpandProperty statuscode
-     if ($r -eq 200 -or $r -eq "Unauthorized" -or $r -eq "Forbidden")
+     if (($r -in (200,301,302,401,403) -or $r -eq "Unauthorized" -or $r -eq "Forbidden") -and $resp -notmatch "burp")
      {
         $i | Out-File -FilePath valid_address.txt -Append
         
         Write-host "response = $r [+] Can be scanned with Burp" -BackgroundColor Green -ForegroundColor Black
        
         
-     }
-     elseif ( $var -in ("NXDOMAIN","SERVFAIL")) {
-
-      $i | Out-File -FilePath NXDOMAIN.txt -Append 
-      
-     
-      Write-host "response = $r [-] Non existent domain" -BackgroundColor Red -ForegroundColor Black 
- 
-
      } else {
-        $i | Out-File -FilePath invalid_address.txt -Append
-        
-        Write-host "response = $r [-] web server cannot be reached " -BackgroundColor Red -ForegroundColor Black
- 
+      $i | Out-File -FilePath invalid_address.txt -Append
+      
+      Write-host "response = $r [-] web server cannot be reached " -BackgroundColor Red -ForegroundColor Black
+
+     
 
       }
+      if ( $var -match "NXDOMAIN" -or $var -match "SERVFAIL") {
+      
+         $i | Out-File -FilePath NXDOMAIN.txt -Append  
+   
+         Write-host "response = $r [-] Non existent domain" -BackgroundColor Red -ForegroundColor Black          
+   
+     } 
              
      Write-host "server = $i"     
      Write-host "$var"       
-     write-host "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
-     write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"   | Out-File -FilePath SCAN.LOG -Append     
+     write-host "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
+     write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"     
      Write-host "=====================================" 
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
      Write-Output "server = $i" | Out-File -FilePath SCAN.LOG -Append  
-   #   Write-Output $var | Out-File -FilePath SCAN.LOG -Append
+     write-Output "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
+     write-Output "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"   | Out-File -FilePath SCAN.LOG -Append     
+     #   Write-Output $var | Out-File -FilePath SCAN.LOG -Append
      Write-Output $resp.BaseResponse.Headers | Out-File -FilePath SCAN.LOG -Append
      Write-Output "-----------------------------------" | Out-File -FilePath SCAN.LOG -Append
 
