@@ -37,34 +37,3 @@ To send GET request via local burp proxy
 ++ Currently working on a function that will show us all redirection steps with full details and HTTP codes.
 
 
-Example of output
-
-response = 200 [+] Can be scanned with Burp
-server = 192.168.2.1
-Host 1.2.168.192.in-addr.arpa. not found: 3(NXDOMAIN)
-Original domain = 192.168.2.1
-Destination page = http://192.168.2.1
-=====================================
-response =  [-] Non existent domain
-server = https://192.168.2.1
-Host 1.2.168.192.in-addr.arpa. not found: 3(NXDOMAIN)
-Original domain = 
-Destination page = 
-=====================================
-response = 200 [+] Can be scanned with Burp
-server = jasne.pl
-jasne.pl has address 188.128.255.251
-Original domain = www.sklepdomeny.pl
-Destination page = http://www.sklepdomeny.pl/domena/jasne.pl
-=====================================
-response =  [-] web server cannot be reached 
-server = https://jasne.pl
-jasne.pl has address 188.128.255.251
-Original domain = 
-Destination page = 
-=====================================
-response =  [-] web server cannot be reached 
-server = Bajki.pl
-Host Bajki.pl not found: 2(SERVFAIL)
-Original domain = 
-Destination page = 
