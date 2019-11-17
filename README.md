@@ -5,24 +5,21 @@ It uses the "host" command which is not on Windows. Soon, probably will add a .N
 
 Shortly it's a simple powershell script to perform a get request using invoke-webrequest cmdlet.
 It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser ;)
-Scripts has been optimised and will take few minutes not hours, depends how long is your list.
+Script has been optimised and now it will take few minutes not hours, depends how long is your list.
 What is this script for anyway?
-Well you can use it to check if a specific domain exists, check for a web server presence , diagnostics, OSINT, redirections and more...
-SImply put If you have a list of different domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports then this script will really speed up your searches.
+Well you can use it to check if a specific domain exists, check for a web server presence , diagnostics, OSINT, redirections and more...?
+Simply put If you have a list of different domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports then this script will really speed up your searches.
 
 ++ features ++
 - added burp as a proxy so you can see all the GET requests in burp for further scans....
-- script follows redirections (5 by default - can be changed)
-- and most important the user-agent header will not show powershell as the agent but it randomly will use from(chrome,firefox/safari,IE,opera)
+- script follows redirections (5 by default - can be changed if needed)
+- and most important the user-agent header will not show powershell as the agent but it will randomly use one of the following (chrome,firefox/safari,IE,opera)
 - results will be saved it 4 different files ()
 
 Script has 2 parameters.
 - list (Argument for the list parameter will be your previously created file with all domains you want to check)
 
 - local_proxy (Arguments for the local_proxy are $true or $false.)
-
-
-
 
 Usage:
 start powershell on linux/mac
