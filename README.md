@@ -8,7 +8,7 @@ It has been created to perfom bulk checks for multiple domains. To use it agains
 Scripts has been optimised and will take few minutes not hours, depends how long is your list.
 What is this script for anyway?
 Well you can use it to check if a specific domain exists, check for a web server presence , diagnostics, OSINT, redirections and more...
-If you have a list of different domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports then this script will really speed up your searches.
+SImply put If you have a list of different domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports then this script will really speed up your searches.
 
 ++ features ++
 - added burp as a proxy so you can see all the GET requests in burp for further scans....
@@ -36,4 +36,5 @@ To send GET request via local burp proxy
    You can change your burp port in the script file. vatiable name proxy_burp
    By default proxy listens on port 8080, you can also use any other proxy, does not have to be local proxy ;)
   
+++ Currently working on a function that will show us all redirection steps with full details and HTTP codes.
 
