@@ -15,12 +15,12 @@ SImply put If you have a list of different domains/subdomains/servers and you wo
 - script follows redirections (5 by default - can be changed)
 - results will be saved it 4 different files ()
 
-Script has 2 parameters
--list
--local_proxy
+Script has 2 parameters.
+- list (Argument for the list parameter will be your previously created file with all domains you want to check)
 
-Argument for the list parameter will be your previously created file with all domains you want to check
-Arguments for the local_proxy are $true or $false. 
+- local_proxy (Arguments for the local_proxy are $true or $false.)
+
+
 
 
 Usage:
