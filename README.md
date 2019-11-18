@@ -24,12 +24,12 @@ Script has 2 parameters.
 Usage:
 start powershell on linux/mac
 To send GET request via local burp proxy
--    Usage: ./get-domain.ps1 -list your_file_list.txt -local_proxy $true 
--    example: /get-domain.ps1 -list ./test.txt -local_proxy $true
+-    Usage: ./get-web-request.ps1 -list your_file_list.txt -local_proxy $true 
+-    example: /get-web-request.ps1 -list ./test.txt -local_proxy $true
    
 -    To send GET request directly
--    Usage: ./get-domain.ps1 -list your_file_list.txt -local_proxy $false
--    Example: /get-domain.ps1 -list ./test.txt -local_proxy $false
+-    Usage: ./get-web-request.ps1 -list your_file_list.txt -local_proxy $false
+-    Example: /get-web-request.ps1 -list ./test.txt -local_proxy $false
 
    You can change your burp port in the script file. Variable name is:proxy_burp.
    By default proxy listens on port 8080, you can also use any other proxy, does not have to be local proxy if you know what I mean ;)
