@@ -83,7 +83,7 @@ foreach($a in $lista){
                                                                 
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
      $r=$resp | Select-Object  -ExpandProperty statuscode
-     if (($r -in (200,301,302,401,403) -or $r -eq "Unauthorized" -or $r -eq "Forbidden") -and $resp -notmatch "burp")
+     if (($r -in (200,301,302,401,403) -or $r -eq "Unauthorized" -or $r -eq "Forbidden" -or $r -eq "MethodNotAllowed") -and $resp -notmatch "burp")
      {
         $i | Out-File -FilePath valid_address.txt -Append
         
@@ -123,3 +123,19 @@ foreach($a in $lista){
  }
     
     
+ $duplicat=Get-Content ./valid_address.txt
+ $unikat=@()
+ foreach($d in $duplicat){
+     if($d -match "https"){
+ 
+         $unikat+=$d.substring(8,$d.length-8)
+ 
+     } else {
+ 
+         $unikat+=$d
+     }
+ 
+ 
+ 
+ }
+ $unikat | select -Unique | Out-File -FilePath VALID_DOMAINS.txt -Append
