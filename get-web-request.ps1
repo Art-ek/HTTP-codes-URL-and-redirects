@@ -41,6 +41,11 @@ $firefox=([Microsoft.PowerShell.Commands.PSUserAgent]::FireFox)
 
 $agents=@($ie,$opera,$chrome,$safari,$firefox) 
 
+# 1xx informational response – the request was received, continuing process
+# 2xx successful – the request was successfully received, understood and accepted
+# 3xx redirection – further action needs to be taken in order to complete the request
+# 4xx client error – the request contains bad syntax or cannot be fulfilled
+# 5xx server error – the server failed to fulfill an apparently valid request
 
 $array=@()
 
@@ -82,8 +87,9 @@ foreach($a in $lista){
      }          
                                                                 
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
+     $desc=$resp | Select-Object -ExpandProperty StatusDescription
      $r=$resp | Select-Object  -ExpandProperty statuscode
-     if (($r -in (200,301,302,401,403) -or $r -eq "Unauthorized" -or $r -eq "Forbidden" -or $r -eq "MethodNotAllowed") -and $resp -notmatch "burp")
+     if (($r -match '^(1|2|3|4|5)0\d$' -or $r -eq "Unauthorized" -or $r -eq "Forbidden" -or $r -eq "MethodNotAllowed") -and $resp -notmatch "burp")
      {
         $i | Out-File -FilePath valid_address.txt -Append
         
@@ -114,6 +120,9 @@ foreach($a in $lista){
      write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"     
      Write-host "=====================================" 
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
+     if ($r -match '^(1|2|3|4|5)0\d$'){
+        Write-Output "HTTP status code: $r Code description: $desc" | Out-File -FilePath SCAN.LOG -Append
+     }
      Write-Output "server = $i" | Out-File -FilePath SCAN.LOG -Append  
      write-Output "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
      write-Output "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"   | Out-File -FilePath SCAN.LOG -Append     
