@@ -104,7 +104,9 @@ foreach($a in $lista){
    
          Write-host "response = $r [-] Non existent domain" -BackgroundColor Red -ForegroundColor Black          
    
-     } 
+     } else {
+        $i | Out-File -FilePath valid_address.txt -Append
+     }
              
      Write-host "server = $i"     
      Write-host "$var"       
