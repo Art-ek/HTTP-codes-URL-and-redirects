@@ -6,6 +6,8 @@ param (
 )
 
 
+$sorted_valid_dom=@()
+$sorted_nx_dom=@()
 
 $proxy_burp="http://127.0.0.1:8080"
 
@@ -33,6 +35,7 @@ if(!$path -or $path -eq $null) {
     break;
 } 
 $lista=get-Content $list
+
 $ie=([Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer)
 $opera=([Microsoft.PowerShell.Commands.PSUserAgent]::Opera)
 $chrome=([Microsoft.PowerShell.Commands.PSUserAgent]::Chrome)
@@ -48,7 +51,7 @@ $agents=@($ie,$opera,$chrome,$safari,$firefox)
 # 5xx server error – the server failed to fulfill an apparently valid request
 
 $array=@()
-
+$var=0;
 foreach($a in $lista){
 
    $array+=$a
@@ -77,14 +80,7 @@ foreach($a in $lista){
      }
 
      
-     if($i -match "https"){
-        
-        $temp=$i.substring(8,$i.Length-8)
-        
-        $var= host $temp
-     } else {
-         $var=host $i
-     }          
+       
                                                                 
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
      $r=$resp | Select-Object  -ExpandProperty statuscode
@@ -103,14 +99,38 @@ foreach($a in $lista){
      
 
       }
-      if ( $var -match "NXDOMAIN" -or $var -match "SERVFAIL") {
+
+      if($i -match "https"){
+        
+         $temp=$i.substring(8,$i.Length-8)
+         
+         $var= host $temp
       
-         $i | Out-File -FilePath NXDOMAIN.txt -Append  
+      } else {
+          $var=host $i
+      }        
+   
+      
+      if ( $var -match "NXDOMAIN" -or $var -match "SERVFAIL") {
+
+        $parsed_i=switch -wildcard ($i){
+
+            "https://*" {  $i.substring(8,$i.Length-8)}
+             Default    {$i}
+        }        
+        $sorted_nx_dom+=$parsed_i 
    
          Write-host "response = $r [-] Non existent domain" -BackgroundColor Red -ForegroundColor Black          
-   
+        
      } else {
-        $i | Out-File -FilePath valid_address.txt -Append
+        
+        $parsed_i=switch -wildcard ($i){
+
+            "https://*" {  $i.substring(8,$i.length-8)}
+
+             Default    {$i}
+        }   
+        $sorted_valid_dom+=$parsed_i 
      }
              
      Write-host "server = $i"     
@@ -121,7 +141,7 @@ foreach($a in $lista){
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
      if ($r -match '^(1|2|3|4|5)0\d$'){
         Write-Output "HTTP status code: $r " | Out-File -FilePath SCAN.LOG -Append
-     }
+     } 
      Write-Output "server = $i" | Out-File -FilePath SCAN.LOG -Append  
      write-Output "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
      write-Output "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"   | Out-File -FilePath SCAN.LOG -Append     
@@ -131,21 +151,21 @@ foreach($a in $lista){
 
    
  }
-    
-    
- $duplicat=Get-Content ./valid_address.txt
- $unikat=@()
- foreach($d in $duplicat){
-     if($d -match "https"){
+
+ $sorted_valid_dom |select -Unique | Out-File -FilePath VALID_DOMAINS.txt -Append
+ $sorted_nx_dom | select -Unique | Out-File -FilePath NXDOMAIN.txt -Append 
+
+
+#  $duplicat=Get-Content ./valid_address.txt
+#  $unikat=@()
+#  foreach($d in $duplicat){
+#      if($d -match "https"){
  
-         $unikat+=$d.substring(8,$d.length-8)
+#          $unikat+=$d.substring(8,$d.length-8)
  
-     } else {
+#      } else {
  
-         $unikat+=$d
-     }
- 
- 
- 
- }
- $unikat | select -Unique | Out-File -FilePath VALID_DOMAINS.txt -Append
+#          $unikat+=$d
+#      }
+#  }
+#  $unikat | select -Unique | Out-File -FilePath VALID_DOMAINS_LIST.txt -Append
