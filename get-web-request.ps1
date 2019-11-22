@@ -87,7 +87,6 @@ foreach($a in $lista){
      }          
                                                                 
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
-     $desc=$resp | Select-Object -ExpandProperty StatusDescription
      $r=$resp | Select-Object  -ExpandProperty statuscode
      if (($r -match '^(1|2|3|4|5)0\d$' -or $r -eq "Unauthorized" -or $r -eq "Forbidden" -or $r -eq "MethodNotAllowed") -and $resp -notmatch "burp")
      {
@@ -121,7 +120,7 @@ foreach($a in $lista){
      Write-host "=====================================" 
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
      if ($r -match '^(1|2|3|4|5)0\d$'){
-        Write-Output "HTTP status code: $r Code description: $desc" | Out-File -FilePath SCAN.LOG -Append
+        Write-Output "HTTP status code: $r " | Out-File -FilePath SCAN.LOG -Append
      }
      Write-Output "server = $i" | Out-File -FilePath SCAN.LOG -Append  
      write-Output "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
