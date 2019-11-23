@@ -1,4 +1,4 @@
-# bulk-get-request
+# bulk-get-request script checks HTTP status codes, redirections and http headers
 
 Disclaimer, This is a very early beta version and has been created using .NET core and will only run on *NIX* like systems.
 It uses the "host" command which is not on Windows. Soon, probably will add a .NET function to replace it.
