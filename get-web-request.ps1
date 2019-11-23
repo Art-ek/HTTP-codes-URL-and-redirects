@@ -51,7 +51,7 @@ $agents=@($ie,$opera,$chrome,$safari,$firefox)
 # 4xx client error – the request contains bad syntax or cannot be fulfilled
 # 5xx server error – the server failed to fulfill an apparently valid request
 
-# creating an array containing both HTTP and HTTPS adressess
+# creating an array containing both HTTP and HTTPS addresses
 $domain_array=@()
 foreach($a in $domain_list){
 
