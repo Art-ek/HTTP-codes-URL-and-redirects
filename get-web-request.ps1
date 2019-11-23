@@ -5,10 +5,9 @@ param (
     [Parameter(Mandatory=$false)][bool]$local_proxy=$false
 )
 
-
+$dns_host=0;
 $sorted_valid_dom=@()
 $sorted_nx_dom=@()
-
 $proxy_burp="http://127.0.0.1:8080"
 
 $path=Test-Path $list;
@@ -34,7 +33,9 @@ if(!$path -or $path -eq $null) {
     Write-Output "[*] Unable to locate the spcified input file";
     break;
 } 
-$lista=get-Content $list
+
+# importing domain list froma a file/variable and asigning to the domain_list variable
+$domain_list=get-Content $list
 
 $ie=([Microsoft.PowerShell.Commands.PSUserAgent]::InternetExplorer)
 $opera=([Microsoft.PowerShell.Commands.PSUserAgent]::Opera)
@@ -50,15 +51,15 @@ $agents=@($ie,$opera,$chrome,$safari,$firefox)
 # 4xx client error – the request contains bad syntax or cannot be fulfilled
 # 5xx server error – the server failed to fulfill an apparently valid request
 
-$array=@()
-$var=0;
-foreach($a in $lista){
+# creating an array containing both HTTP and HTTPS adressess
+$domain_array=@()
+foreach($a in $domain_list){
 
-   $array+=$a
-   $array+="https://$a"
+   $domain_array+=$a
+   $domain_array+="https://$a"
 }
 
- foreach($i in $array){
+ foreach($i in $domain_array){
      $resp=$null
      $resp=try
      {
@@ -69,7 +70,7 @@ foreach($a in $lista){
             Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck
          }else{
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 
+            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck
 
          }
 
@@ -99,19 +100,19 @@ foreach($a in $lista){
      
 
       }
-
+      #removing "https://" to use host command
       if($i -match "https"){
         
          $temp=$i.substring(8,$i.Length-8)
          
-         $var= host $temp
+         $dns_host= host $temp
       
       } else {
-          $var=host $i
+          $dns_host=host $i
       }        
    
       
-      if ( $var -match "NXDOMAIN" -or $var -match "SERVFAIL") {
+      if ( $dns_host -match "NXDOMAIN" -or $dns_host -match "SERVFAIL") {
 
         $parsed_i=switch -wildcard ($i){
 
@@ -131,10 +132,11 @@ foreach($a in $lista){
              Default    {$i}
         }   
         $sorted_valid_dom+=$parsed_i 
+               
      }
              
      Write-host "server = $i"     
-     Write-host "$var"       
+     Write-host "$dns_host"       
      write-host "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
      write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"     
      Write-host "=====================================" 
@@ -142,6 +144,7 @@ foreach($a in $lista){
      if ($r -match '^(1|2|3|4|5)0\d$'){
         Write-Output "HTTP status code: $r " | Out-File -FilePath SCAN.LOG -Append
      } 
+     Write-Output "$dns_host" | Out-File -FilePath SCAN.LOG -Append 
      Write-Output "server = $i" | Out-File -FilePath SCAN.LOG -Append  
      write-Output "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
      write-Output "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"   | Out-File -FilePath SCAN.LOG -Append     
@@ -152,8 +155,8 @@ foreach($a in $lista){
    
  }
 
- $sorted_valid_dom |select -Unique | Out-File -FilePath VALID_DOMAINS.txt -Append
- $sorted_nx_dom | select -Unique | Out-File -FilePath NXDOMAIN.txt -Append 
+ $sorted_valid_dom |Select-Object -Unique | Out-File -FilePath VALID_DOMAINS.txt -Append
+ $sorted_nx_dom | Select-Object -Unique | Out-File -FilePath NXDOMAIN.txt -Append 
 
 
 #  $duplicat=Get-Content ./valid_address.txt
