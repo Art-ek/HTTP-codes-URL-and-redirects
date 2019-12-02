@@ -40,3 +40,8 @@ Example output
 
 ![example output](./Output_example.png)
 
+Log file created with more specific information
+
+![example output](./log_output.png)
+
+
