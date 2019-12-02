@@ -1,4 +1,4 @@
-# bulk-get-request script checks HTTP status codes, redirections and http headers
+# Bulk GET request script to check HTTP status codes, redirections and http headers #
 
 Disclaimer, This is a very early beta version and has been created using .NET core and will only run on *NIX* like systems.
 It uses the "host" command which is not on Windows. Soon, probably will add a .NET function to replace it.
@@ -36,4 +36,7 @@ To send GET request via local burp proxy
   
 ++ Currently working on a function that will show us all redirection steps with full details and HTTP codes.
 
+Example output
+
+![example output](/path/to/img.jpg)
 
