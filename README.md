@@ -38,5 +38,5 @@ To send GET request via local burp proxy
 
 Example output
 
-![example output](/path/to/img.jpg)
+![example output](./Output_example.png)
 
