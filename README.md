@@ -41,7 +41,7 @@ To send GET request via local burp proxy
 
 Example output
 
-![example output](./Output_example.png)
+![example output](./4.png)
 
 Log file created with more specific information
 
