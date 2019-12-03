@@ -17,6 +17,7 @@ Simply put If you have a list of different domains/subdomains/servers and you wo
 - script follows redirections (5 by default - can be changed if needed)
 - and most important the user-agent header will not show powershell as the agent but it will randomly use one of the following (chrome,firefox/safari,IE,opera)
 - results will be saved it 4 different files ()
+- **IP geo locations added**
 
 Script has 2 parameters.
 - list (Argument for the list parameter will be your previously created file with all domains you want to check)
