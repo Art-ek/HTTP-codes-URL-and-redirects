@@ -10,7 +10,7 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='go to ipinfo.io'
+$token='got to ipinfo.io for your token'
 
 
 $path=Test-Path $list;
@@ -162,7 +162,12 @@ foreach($a in $domain_list){
      
      Write-Host "Location -> Country: $country, Region: $region, City: $city"     
      write-host "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
-     write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"     
+     if($resp.BaseResponse.RequestMessage.RequestUri.Originalstring -match "http://"){
+     write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)  ¯\_(ツ)_/¯ ekhem no tls?"    
+     } else {
+      write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring) "   
+ 
+     }
      write-host "Error Status code = $errorstatus, Redirected to: $errorrequest "
      Write-host "=====================================" 
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
