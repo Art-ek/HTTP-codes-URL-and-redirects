@@ -3,7 +3,7 @@
 # Bulk GET request script to check HTTP status codes, redirections and http headers #
 
 Disclaimer, This is a very early beta version and has been created using .NET core and will only run on *NIX* like systems.
-It uses the "host" command which is not on Windows. Soon, probably will add a .NET function to replace it.
+It uses the "host" command which is not on Windows. Soon, will probably add a .NET function to replace it.
 
 Shortly it's a simple powershell script to perform a get request using invoke-webrequest cmdlet.
 It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser ;)
