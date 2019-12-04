@@ -9,17 +9,17 @@ Shortly it's a simple powershell script to perform a get request using invoke-we
 It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser ;)
 Script has been optimised and now it will take few minutes not hours, depends how long is your list.
 What is this script for anyway?
-Well you can use it to check if a specific domain exists, check for a web server presence , diagnostics, OSINT, redirections and more...?
+Well you can use it to check if a specific domain exists, check for a **web server presence** , diagnostics,**OSINT**, **redirections** and more...?
 Simply put If you have a list of different domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports then this script will really speed up your searches.
 
 ## ++ features ++
-- It will check both http and https, you just need to provide a domain name like bbc.co.uk, bing.com, example.com and each domain must be in a new line 
-- web presense , it will check redirections and show destination page
+- It will check both **http and https**, you just need to provide a domain name like bbc.co.uk, bing.com, example.com and each domain must be in a new line 
+- **web presense** , it will check redirections and show destination page
 - Physical locations **IP geo location added. I'm using ipinfo.io API for geo stuff. To get your free auth token please visit this site**
 - Easy input, paste as many as you like URLs and check status codes and redirects in one batch
 - added burp as a proxy so you can see all the GET requests in burp for further scans....
 - script follows redirections (5 by default - can be changed if needed)
-- and most important the user-agent header will not show powershell as the agent but it will randomly use one of the following (chrome,firefox/safari,IE,opera)
+- and most important the **user-agent header** will not show powershell as the agent but it will randomly use one of the following (chrome,firefox/safari,IE,opera)
 - results will be saved it 4 different files (SCAN.LOG, VALID_DOMAINS.txt, NXDOMAINS.txt, valid_address.txt,invalid_address.txt)
 
 Script has 2 parameters.
