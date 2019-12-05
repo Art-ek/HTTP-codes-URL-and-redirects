@@ -21,7 +21,7 @@ another.domain.org
 ```
 - **web presense** , it will check redirections and show destination page
 - Physical locations **IP geo location added. I'm using ipinfo.io API for geo stuff. To get your free auth token please visit this site**
-- Easy input, paste as many as you like URLs and check status codes and redirects in one batch
+- Easy input, paste as many domains as you like and check status codes and redirects in one batch
 - added burp as a proxy so you can see all the GET requests in burp for further scans....
 - script follows redirections (5 by default - can be changed if needed)
 - and most important the **user-agent header** will not show powershell as the agent but it will randomly use one of the following (chrome,firefox/safari,IE,opera)
@@ -36,11 +36,11 @@ Usage:
 start powershell on linux/mac
 To send GET request via local burp proxy
 -    Usage: ./get-web-request.ps1 -list your_file_list.txt -local_proxy $true 
--    example: **/get-web-request.ps1 -list ./test.txt -local_proxy $true
+-    example: **/get-web-request.ps1 -list ./test.txt -local_proxy $true**
    
 -    To send GET request directly
 -    Usage: ./get-web-request.ps1 -list your_file_list.txt -local_proxy $false
--    Example: **/get-web-request.ps1 -list ./test.txt -local_proxy $false
+-    Example: **/get-web-request.ps1 -list ./test.txt -local_proxy $false**
 
    You can change your burp port in the script file. Variable name is:proxy_burp.
    By default proxy listens on port 8080, you can also use any other proxy, does not have to be local proxy, should work with any proxy, havent tested it.
