@@ -5,11 +5,11 @@
 Disclaimer, This is a very early beta version and has been created using .NET core and will only run on *NIX* like systems.
 It uses the "host" command which is not on Windows. Soon, will probably add a .NET function to replace it.
 
-Shortly it's a simple powershell script to perform a get request using invoke-webrequest cmdlet.
-It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser ;)
+Shortly it's a simple powershell script to perform a get request for bulk http status validation, IP location, hosting info and other usefull stuff.
+It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser , whois, IP geo locator and few more different tools ;)
 Script has been optimised and now it will take few minutes not hours, depends how long is your list.
 What is this script for anyway?
-Well you can use it to check if a specific domain exists, check for a **web server presence** , diagnostics,**OSINT**, **redirections** and more...?
+Well you can use it to check if a specific domain exists, check for a **web server presence** , diagnostics, **weird redirect behavior** ,**OSINT** , **if you cans still use http protocol** and more...
 Simply put If you have a list of different domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports then this script will really speed up your searches.
 
 ## ++ features ++
