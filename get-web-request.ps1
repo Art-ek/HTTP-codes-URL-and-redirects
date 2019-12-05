@@ -104,7 +104,7 @@ foreach($a in $domain_list){
      } else {
       $i | Out-File -FilePath invalid_address.txt -Append
       
-      Write-host "response = $r [-] web server cannot be reached " -BackgroundColor Red -ForegroundColor Black
+      Write-host "response = $r [-] web server cannot be reached $errorstatus" -BackgroundColor Red -ForegroundColor Black
 
      
 
