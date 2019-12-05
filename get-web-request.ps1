@@ -10,7 +10,7 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='bb0216686818fe'
+$token='visit ipinfo.io and get your API token'
 
 
 $path=Test-Path $list;
