@@ -9,7 +9,7 @@ Shortly it's a simple powershell script to perform a get request for bulk http s
 It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser , whois, IP geo locator and few more different tools ;)
 Script has been optimised and now it will take few minutes not hours, depends how long is your list.
 What is this script for anyway?
-Well you can use it to check if a specific domain exists, check for a **web server presence** , diagnostics, **weird redirect behavior** ,**OSINT** , **if you cans still use http protocol** and more...
+Well you can use it to check if a specific domain exists, check for a **web server presence** , diagnostics, **weird redirect behavior** ,**OSINT** , **and if a web server uses http ot https protocol** and more...
 Simply put If you have a list of different domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports then this script will really speed up your searches.
 
 ## ++ features ++
