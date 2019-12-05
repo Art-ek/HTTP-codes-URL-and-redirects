@@ -10,10 +10,15 @@ It has been created to perfom bulk checks for multiple domains. To use it agains
 Script has been optimised and now it will take few minutes not hours, depends how long is your list.
 What is this script for anyway?
 Well you can use it to check if a specific domain exists, check for a **web server presence** , diagnostics, **weird redirect behavior** ,**OSINT** , **and if a web server uses http ot https protocol** and more...
-Simply put If you have a list of different domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports then this script will really speed up your searches.
+Simply put If you manage multiple domains/subdomains/servers and you would like to check if they host a web server on standard 80 and 443 ports or maybe migration testing? then this script will really speed up your searches. 
 
 ## ++ features ++
 - It will check both **http and https**, you just need to provide a domain name like bbc.co.uk, bing.com, example.com and each domain must be in a new line 
+```
+domain.com
+domain1.net
+another.domain.org
+```
 - **web presense** , it will check redirections and show destination page
 - Physical locations **IP geo location added. I'm using ipinfo.io API for geo stuff. To get your free auth token please visit this site**
 - Easy input, paste as many as you like URLs and check status codes and redirects in one batch
