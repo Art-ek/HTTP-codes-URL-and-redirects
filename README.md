@@ -6,7 +6,7 @@ Disclaimer, This is a very early beta version and has been created using .NET co
 It uses the "host" command which is not on Windows. Soon, will probably add a .NET function to replace it.
 
 Shortly it's a simple powershell script to perform a get request for bulk http status validation, IP location, hosting info and other usefull stuff.
-It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser , whois, IP geo locator and few more different tools ;)
+It has been created to perfom bulk checks for multiple domains. To use it against a simple domain, you might also just use your browser , whois, IP geo locator and few more different tools...
 Script has been optimised and now it will take few minutes not hours, depends how long is your list.
 What is this script for anyway?
 Well you can use it to check if a specific domain exists, check for a **web server presence** , diagnostics, **weird redirect behavior** ,**OSINT** , **and if a web server uses http ot https protocol** and more...
@@ -38,7 +38,7 @@ To send GET request via local burp proxy
 -    Example: /get-web-request.ps1 -list ./test.txt -local_proxy $false
 
    You can change your burp port in the script file. Variable name is:proxy_burp.
-   By default proxy listens on port 8080, you can also use any other proxy, does not have to be local proxy if you know what I mean ;)
+   By default proxy listens on port 8080, you can also use any other proxy, does not have to be local proxy, should work with any proxy, havent tested it.
   
 ++ Currently working on a function that will show us all redirection steps with full details and HTTP codes.
 
