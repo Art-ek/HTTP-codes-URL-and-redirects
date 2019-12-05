@@ -10,7 +10,7 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='got to ipinfo.io for your token'
+$token='bb0216686818fe'
 
 
 $path=Test-Path $list;
@@ -69,16 +69,19 @@ foreach($a in $domain_list){
      $city="N/A"
      $country="N/A"
      $region="N/A"
+     $hostedOn="N/A"
+     $hostedcompany="N/A"
+     
      $resp=try
      {
          
          if($local_proxy -eq $true){
             
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck
+            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck -RetryIntervalSec 1
          }else{
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck 
+            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck -RetryIntervalSec 1
 
          }
 
@@ -140,8 +143,13 @@ foreach($a in $domain_list){
 
              Default    {$i
                $IP=([system.net.dns]::GetHostByName($i)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1
+               
                $geo="ipinfo.io/$IP/geo/?token=$token"
+               $hosting="ipinfo.io/$IP/json?org?token=$token"
+
                $geoinfo=Invoke-RestMethod -uri $geo 
+               $hostingInfo=Invoke-RestMethod -uri $hosting
+               
 
             }
         }   
@@ -149,26 +157,28 @@ foreach($a in $domain_list){
         $city=$geoinfo.City
         $country=$geoinfo.Country
         $region=$geoinfo.Region
+        $hostingname=$hostingInfo.hostname
+        $hostingcompany=$hostingInfo.org
+        $postal=$hostingInfo.postal
         
-
-
                
      }
 
              
-     Write-host "Server www = $i"    
+     Write-host "■ Server www = $i"    
 
-     Write-host "$dns_host"  
+     Write-host "■ $dns_host"  
      
-     Write-Host "Location -> Country: $country, Region: $region, City: $city"     
-     write-host "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
+     Write-Host "■ Location -> Country: $country, Region: $region, City: $city"  
+     Write-Host "■ Hosting Server = $hostingname, Hosting Company = $hostingcompany"   
+     write-host "■ Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
      if($resp.BaseResponse.RequestMessage.RequestUri.Originalstring -match "http://"){
-     write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)  ¯\_(ツ)_/¯ ekhem no tls?"    
+     write-host "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)  ¯\_(ツ)_/¯ ekhem no tls?"    
      } else {
-      write-host "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring) "   
+      write-host "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring) "   
  
      }
-     write-host "Error Status code = $errorstatus, Redirected to: $errorrequest "
+     write-host "■ Error Status code = $errorstatus, Redirected to: $errorrequest "
      Write-host "=====================================" 
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
      if ($r -match '^(1|2|3|4|5)0\d$'){
@@ -177,6 +187,7 @@ foreach($a in $domain_list){
      Write-Output "$dns_host" | Out-File -FilePath SCAN.LOG -Append 
      Write-Output "Server www = $i" | Out-File -FilePath SCAN.LOG -Append 
      Write-Output "Location -> Country: $country, Region: $region, City: $city" | Out-File -FilePath SCAN.LOG -Append   
+     Write-Output "Hosting Server = $hostingname, Hosting Company = $hostingcompany" |  Out-File -FilePath SCAN.LOG -Append   
      write-Output "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
      write-Output "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"   | Out-File -FilePath SCAN.LOG -Append     
      #   Write-Output $var | Out-File -FilePath SCAN.LOG -Append
