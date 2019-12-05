@@ -1,6 +1,6 @@
 | Another article about Hunting malware with Powershell --> [PS for hunting malware](https://art-ek.github.io/pshell-virusTotal/) | An article about Powershell automation –> [System audit in Powershell](https://art-ek.github.io/SystemAudit/) |
 
-# Bulk GET request script to check HTTP status , redirections, http headers an IP location#
+# Bulk GET request script to check HTTP status , redirections, http headers an IP location #
 
 Disclaimer, This is a very early beta version and has been created using .NET core and will only run on *NIX* like systems.
 It uses the "host" command which is not on Windows. Soon, will probably add a .NET function to replace it.
