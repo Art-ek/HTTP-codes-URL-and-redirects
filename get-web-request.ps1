@@ -10,7 +10,7 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='visit ipinfo.io and get your API token'
+$token='bb0216686818fe'
 
 
 $path=Test-Path $list;
@@ -69,8 +69,8 @@ foreach($a in $domain_list){
      $city="N/A"
      $country="N/A"
      $region="N/A"
-     $hostedOn="N/A"
-     $hostedcompany="N/A"
+     $hostingname="N/A"
+     $hostingcompany="N/A"
      
      $resp=try
      {
@@ -101,13 +101,13 @@ foreach($a in $domain_list){
      {
         $i | Out-File -FilePath valid_address.txt -Append
         
-        Write-host "response = $r [+] Can be scanned with Burp" -BackgroundColor Green -ForegroundColor Black
+        Write-host "response = $r [+] Web Server is reachable" -BackgroundColor Green -ForegroundColor Black
        
         
      } else {
       $i | Out-File -FilePath invalid_address.txt -Append
       
-      Write-host "response = $r [$errorstatus] web server cannot be reached " -BackgroundColor Red -ForegroundColor Black
+      Write-host "response = $r [$errorstatus] Web Server cannot be reached " -BackgroundColor Red -ForegroundColor Black
 
      
 
@@ -159,7 +159,6 @@ foreach($a in $domain_list){
         $region=$geoinfo.Region
         $hostingname=$hostingInfo.hostname
         $hostingcompany=$hostingInfo.org
-        $postal=$hostingInfo.postal
         
                
      }
