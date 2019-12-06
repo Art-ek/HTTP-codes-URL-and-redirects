@@ -10,7 +10,7 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='bb0216686818fe'
+$token='go to ipinfo.io'
 
 
 $path=Test-Path $list;
@@ -25,7 +25,7 @@ if($list -eq ''-or $list -eq $null){
    Usage: ./get-web-request.ps1 -list your_file_list.txt -local_proxy $false
    Example: /get-web-request.ps1 -list ./test.txt -local_proxy $false
 
-   You can change your burp port in the this file. vatiable name proxy_burp
+   You can change your burp port in the this file. variable name is: proxy_burp
    By default proxy listens on port 8080
 
    @'
@@ -56,7 +56,7 @@ $agents=@($ie,$opera,$chrome,$safari,$firefox)
 
 # creating an array containing both HTTP and HTTPS addresses
 $domain_array=@()
-foreach($a in $domain_list){
+foreach ($a in $domain_list){
 
    $domain_array+=$a
    $domain_array+="https://$a"
@@ -78,10 +78,10 @@ foreach($a in $domain_list){
          if($local_proxy -eq $true){
             
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck -RetryIntervalSec 1
+            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck -RetryIntervalSec 1 -MaximumRetryCount 2
          }else{
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck -RetryIntervalSec 1
+            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck -RetryIntervalSec 1 -MaximumRetryCount 2
 
          }
 
@@ -163,8 +163,8 @@ foreach($a in $domain_list){
                
      }
 
-             
-     Write-host "■ Server www = $i"    
+     # Later on will use the tee-object         
+     Write-host "■ Server www = $i" 
 
      Write-host "■ $dns_host"  
      
