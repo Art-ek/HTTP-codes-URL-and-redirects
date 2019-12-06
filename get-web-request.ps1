@@ -10,7 +10,7 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='go to ipinfo.io'
+$token='your token'
 
 
 $path=Test-Path $list;
@@ -63,6 +63,7 @@ foreach ($a in $domain_list){
 }
 
  foreach($i in $domain_array){
+     $no_dns=$false
      $errorrequest="N/A"
      $errorstatus="N/A"
      $resp=$null
@@ -78,10 +79,10 @@ foreach ($a in $domain_list){
          if($local_proxy -eq $true){
             
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck -RetryIntervalSec 1 -MaximumRetryCount 2
+            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck 
          }else{
             $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck -RetryIntervalSec 1 -MaximumRetryCount 2
+            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck  
 
          }
 
@@ -92,7 +93,59 @@ foreach ($a in $domain_list){
         $errorstatus=$_.exception.response.statuscode
       }
 
+     #removing "https://" to use host command
+     if($i -match "https"){
+        
+      #$temp=$i.substring(8,$i.Length-8)
+      
+      #$dns_host= host $temp
+      
+   } else {
+       $dns_host=host $i
+   }        
+
+   
+   if ( $dns_host -match "NXDOMAIN" -or $dns_host -match "SERVFAIL" -or $dns_host -eq $null) {
+     $no_dns=$true
+     $parsed_i=switch -wildcard ($i){
+
+         "https://*" {  $i.substring(8,$i.Length-8)}
+          Default    {$i}
+     }        
+     $sorted_nx_dom+=$parsed_i 
+
+      Write-host "response = $r [] Non existent domain" -BackgroundColor Red -ForegroundColor Black          
      
+  } else {
+     
+     $parsed_i=switch -wildcard ($i){
+
+         "https://*" {  $i.substring(8,$i.length-8)}
+
+          Default    {$i
+            $IP=([system.net.dns]::GetHostByName($i)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1
+            
+            $geo="ipinfo.io/$IP/geo/?token=$token"
+            $hosting="ipinfo.io/$IP/json?org?token=$token"
+
+            $geoinfo=Invoke-RestMethod -uri $geo 
+            $hostingInfo=Invoke-RestMethod -uri $hosting
+            
+
+         }
+     }   
+     $sorted_valid_dom+=$parsed_i 
+     $city=$geoinfo.City
+     $country=$geoinfo.Country
+     $region=$geoinfo.Region
+     $hostingname=$hostingInfo.hostname
+     $hostingcompany=$hostingInfo.org
+     
+            
+  
+
+
+
        
                                                                 
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
@@ -112,62 +165,12 @@ foreach ($a in $domain_list){
      
 
       }
-      #removing "https://" to use host command
-      if($i -match "https"){
-        
-         $temp=$i.substring(8,$i.Length-8)
-         
-         $dns_host= host $temp
-      
-      } else {
-          $dns_host=host $i
-      }        
-   
-      
-      if ( $dns_host -match "NXDOMAIN" -or $dns_host -match "SERVFAIL" -or $dns_host -eq $null) {
-
-        $parsed_i=switch -wildcard ($i){
-
-            "https://*" {  $i.substring(8,$i.Length-8)}
-             Default    {$i}
-        }        
-        $sorted_nx_dom+=$parsed_i 
-   
-         Write-host "response = $r [-] Non existent domain" -BackgroundColor Red -ForegroundColor Black          
-        
-     } else {
-        
-        $parsed_i=switch -wildcard ($i){
-
-            "https://*" {  $i.substring(8,$i.length-8)}
-
-             Default    {$i
-               $IP=([system.net.dns]::GetHostByName($i)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1
-               
-               $geo="ipinfo.io/$IP/geo/?token=$token"
-               $hosting="ipinfo.io/$IP/json?org?token=$token"
-
-               $geoinfo=Invoke-RestMethod -uri $geo 
-               $hostingInfo=Invoke-RestMethod -uri $hosting
-               
-
-            }
-        }   
-        $sorted_valid_dom+=$parsed_i 
-        $city=$geoinfo.City
-        $country=$geoinfo.Country
-        $region=$geoinfo.Region
-        $hostingname=$hostingInfo.hostname
-        $hostingcompany=$hostingInfo.org
-        
-               
-     }
-
+   }
      # Later on will use the tee-object         
      Write-host "■ Server www = $i" 
-
+     if($no_dns){
      Write-host "■ $dns_host"  
-     
+     } else {
      Write-Host "■ Location -> Country: $country, Region: $region, City: $city"  
      Write-Host "■ Hosting Server = $hostingname, Hosting Company = $hostingcompany"   
      write-host "■ Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
@@ -179,6 +182,7 @@ foreach ($a in $domain_list){
      }
      write-host "■ Error Status code = $errorstatus, Redirected to: $errorrequest "
      Write-host "=====================================" 
+     }
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
      if ($r -match '^(1|2|3|4|5)0\d$'){
         Write-Output "HTTP status code: $r " | Out-File -FilePath SCAN.LOG -Append
