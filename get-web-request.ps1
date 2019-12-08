@@ -11,7 +11,14 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='here goes your api token'
+$token='API token'
+# AbuseIP API address and key
+$abuseIPurl = 'https://api.abuseipdb.com/api/v2/check'
+$headers = @{
+    Accept= "application/json"
+    Key= "API key"
+}
+
 
 
 $path=Test-Path $list;
@@ -67,7 +74,7 @@ foreach ($a in $domain_list)
 
 foreach($key in $domain_dict.Keys)
 {
-        
+        $abuse=$null
         $no_dns=$false
         $errorrequest="N/A"
         $errorstatus="N/A"
@@ -108,7 +115,6 @@ foreach($key in $domain_dict.Keys)
     
 
         $dns_host=host $key
-
         if ( $dns_host -match "NXDOMAIN" -or $dns_host -match "SERVFAIL" -or $dns_host -eq $null)
         {
             $no_dns=$true
@@ -129,16 +135,24 @@ foreach($key in $domain_dict.Keys)
                 $IP=([system.net.dns]::GetHostByName($key)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1  
                 $geo="ipinfo.io/$IP/geo?token=$token"
                 $hosting="ipinfo.io/$IP/json?org?token=$token"
-
+                $body = @{
+                    ipAddress= $IP
+                    maxAgeInDays= "365"
+                    verbose=""
+                }
+                $abuse=Invoke-RestMethod -uri $abuseIPurl -Headers $headers -Body $body -Method get 
                 $geoinfo=Invoke-RestMethod -uri $geo 
                 $hostingInfo=Invoke-RestMethod -uri $hosting
-            }      
-      $sorted_valid_dom+=$key
-      $city=$geoinfo.City
-      $country=$geoinfo.Country
-      $region=$geoinfo.Region
-      $hostingname=$hostingInfo.hostname
-      $hostingcompany=$hostingInfo.org  
+            }   
+           
+        
+
+        $sorted_valid_dom+=$key
+        $city=$geoinfo.City
+        $country=$geoinfo.Country
+        $region=$geoinfo.Region
+        $hostingname=$hostingInfo.hostname
+        $hostingcompany=$hostingInfo.org  
                                                                
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
      $r=$resp | Select-Object  -ExpandProperty statuscode
@@ -198,6 +212,39 @@ foreach($key in $domain_dict.Keys)
 
    
     }
+    Write-host "Abuse IP summary from AbuseIPdb.com "
+    $abuse.data | select totalreports,numDistinctUsers,abuseConfidenceScore,lastReportedAt,ipAddress,Countryname | fl
+    write-host "Categories : $($abuse.data.reports |
+    ForEach-Object{ switch($_.categories)
+        {
+            
+            
+            3 {"Fraud Orders, "}
+            4 {"DDos, "}
+            5 {"FTP Brute-Force, "}
+            6 {"Ping of Death, "}
+            7 {"Phishing, "}
+            8 {"Fraud VoIP, "}
+            9 {"Open Proxy, "}
+            10 {"Web Spam, "}
+            11 {"Email Spam, "}
+            12 {"Blog Spam, "}
+            13 {"VPN IP, "}
+            14 {"Port Scan, "}
+            15 {"Hacking, "}
+            16 {"SQL Injection, "}
+            17 {"Spoofing, "}
+            18 {"Brute-ForceBad, "}
+            19 {"Bad Web BOT, "}
+            20 {"Exploited Host, "}
+            21 {"Web App Attack, "}
+            22 {"SSH, "}
+            23 {"IOT Attack, "}
+        }
+        } | Select-Object -Unique) "
+    Write-Host "https://www.abuseipdb.com/check/$IP"
+    write-host "+++++++++++++++++++++++++++++++++++++++++++++"
+
 }
 
  $sorted_valid_dom |Select-Object -Unique | Out-File -FilePath VALID_DOMAINS.txt -Append
