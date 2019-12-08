@@ -11,7 +11,7 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='here goes ur API token'
+$token='here goes your api token'
 
 
 $path=Test-Path $list;
@@ -67,7 +67,7 @@ foreach ($a in $domain_list)
 
 foreach($key in $domain_dict.Keys)
 {
-        $IP=$false
+        
         $no_dns=$false
         $errorrequest="N/A"
         $errorstatus="N/A"
@@ -77,6 +77,8 @@ foreach($key in $domain_dict.Keys)
         $region="N/A"
         $hostingname="N/A"
         $hostingcompany="N/A"
+        $IP=$false
+
 
         for($x=0;$x -lt 2;$x++)
             {
@@ -125,7 +127,7 @@ foreach($key in $domain_dict.Keys)
             else
             {   
                 $IP=([system.net.dns]::GetHostByName($key)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1  
-                $geo="ipinfo.io/$IP/geo/?token=$token"
+                $geo="ipinfo.io/$IP/geo?token=$token"
                 $hosting="ipinfo.io/$IP/json?org?token=$token"
 
                 $geoinfo=Invoke-RestMethod -uri $geo 
