@@ -6,15 +6,17 @@ param (
 )
 $OutputEncoding = [ System.Text.Encoding]::UTF8
 $dns_host=0;
+$domain_dict=@{}
 $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='your token'
+$token='here goes ur API token'
 
 
 $path=Test-Path $list;
-if($list -eq ''-or $list -eq $null){
+if($list -eq ''-or $list -eq $null)
+{
 
    Write-Host '@
    To send GET request via local burp proxy
@@ -30,9 +32,10 @@ if($list -eq ''-or $list -eq $null){
 
    @'
    break
-
 }
-if(!$path -or $path -eq $null) {
+
+if(!$path -or $path -eq $null)
+{
     Write-Output "[*] Unable to locate the spcified input file";
     break;
 } 
@@ -55,140 +58,133 @@ $agents=@($ie,$opera,$chrome,$safari,$firefox)
 # 5xx server error – the server failed to fulfill an apparently valid request
 
 # creating an array containing both HTTP and HTTPS addresses
-$domain_array=@()
-foreach ($a in $domain_list){
 
-   $domain_array+=$a
-   $domain_array+="https://$a"
+#creating an array inside hashtable {domain_name:(http_address,https_address)}
+foreach ($a in $domain_list)
+{
+   $domain_dict.Add($a,@("http://$a","https://$a"))
 }
 
- foreach($i in $domain_array){
-     $no_dns=$false
-     $errorrequest="N/A"
-     $errorstatus="N/A"
-     $resp=$null
-     $city="N/A"
-     $country="N/A"
-     $region="N/A"
-     $hostingname="N/A"
-     $hostingcompany="N/A"
-     
-     $resp=try
-     {
-         
-         if($local_proxy -eq $true){
+foreach($key in $domain_dict.Keys)
+{
+        $IP=$false
+        $no_dns=$false
+        $errorrequest="N/A"
+        $errorstatus="N/A"
+        $resp=$null
+        $city="N/A"
+        $country="N/A"
+        $region="N/A"
+        $hostingname="N/A"
+        $hostingcompany="N/A"
+
+        for($x=0;$x -lt 2;$x++)
+            {
+            $errorrequest=$null
+            $errorstatus=$null
             
-            $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck 
-         }else{
-            $agent=$agents | Get-Random
-            Invoke-WebRequest -uri $i -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck  
+            $resp=try
+            {
+                if($local_proxy -eq $true)
+                {    
+                    $agent=$agents | Get-Random
+                    Invoke-WebRequest -uri $domain_dict[$key][$x] -UserAgent $agent -Proxy $proxy_burp -TimeoutSec 3 -SkipCertificateCheck 
+                }
+                else
+                {
+                    $agent=$agents | Get-Random
+                    Invoke-WebRequest -uri $domain_dict[$key][$x] -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck  
 
-         }
+                }
 
-     }
-     catch
-     {
-        $errorrequest=$_.exception.response.Headers.Location.AbsoluteUri
-        $errorstatus=$_.exception.response.statuscode
-      }
+            }
+            catch
+            {
+                $errorrequest=$_.exception.response.Headers.Location.AbsoluteUri
+                $errorstatus=$_.exception.response.statuscode
+            }
+    
 
-     #removing "https://" to use host command
-     if($i -match "https"){
-        
-      #$temp=$i.substring(8,$i.Length-8)
-      
-      #$dns_host= host $temp
-      
-   } else {
-       $dns_host=host $i
-   }        
+        $dns_host=host $key
 
-   
-   if ( $dns_host -match "NXDOMAIN" -or $dns_host -match "SERVFAIL" -or $dns_host -eq $null) {
-     $no_dns=$true
-     $parsed_i=switch -wildcard ($i){
+        if ( $dns_host -match "NXDOMAIN" -or $dns_host -match "SERVFAIL" -or $dns_host -eq $null)
+        {
+            $no_dns=$true
+             
+            $sorted_nx_dom+=$key
 
-         "https://*" {  $i.substring(8,$i.Length-8)}
-          Default    {$i}
-     }        
-     $sorted_nx_dom+=$parsed_i 
-
-      Write-host "response = $r [] Non existent domain" -BackgroundColor Red -ForegroundColor Black          
+            Write-host "[-] Non existent domain" -BackgroundColor Red -ForegroundColor Black          
      
-  } else {
+        } 
+        else 
+        {
      
-     $parsed_i=switch -wildcard ($i){
+            if($IP -ne $false){
+                $IP=([system.net.dns]::GetHostByName($key)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1
+            }
+            else
+            {   
+                $IP=([system.net.dns]::GetHostByName($key)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1  
+                $geo="ipinfo.io/$IP/geo/?token=$token"
+                $hosting="ipinfo.io/$IP/json?org?token=$token"
 
-         "https://*" {  $i.substring(8,$i.length-8)}
-
-          Default    {$i
-            $IP=([system.net.dns]::GetHostByName($i)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1
-            
-            $geo="ipinfo.io/$IP/geo/?token=$token"
-            $hosting="ipinfo.io/$IP/json?org?token=$token"
-
-            $geoinfo=Invoke-RestMethod -uri $geo 
-            $hostingInfo=Invoke-RestMethod -uri $hosting
-            
-
-         }
-     }   
-     $sorted_valid_dom+=$parsed_i 
-     $city=$geoinfo.City
-     $country=$geoinfo.Country
-     $region=$geoinfo.Region
-     $hostingname=$hostingInfo.hostname
-     $hostingcompany=$hostingInfo.org
-     
-            
-  
-
-
-
-       
-                                                                
+                $geoinfo=Invoke-RestMethod -uri $geo 
+                $hostingInfo=Invoke-RestMethod -uri $hosting
+            }      
+      $sorted_valid_dom+=$key
+      $city=$geoinfo.City
+      $country=$geoinfo.Country
+      $region=$geoinfo.Region
+      $hostingname=$hostingInfo.hostname
+      $hostingcompany=$hostingInfo.org  
+                                                               
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
      $r=$resp | Select-Object  -ExpandProperty statuscode
+
      if (($r -match '^(1|2|3|4|5)0\d$' -or $r -eq "Unauthorized" -or $r -eq "Forbidden" -or $r -eq "MethodNotAllowed") -and $resp -notmatch "burp")
      {
-        $i | Out-File -FilePath valid_address.txt -Append
+        $domain_dict[$key][$x] | Out-File -FilePath valid_address.txt -Append
         
         Write-host "response = $r [+] Web Server is reachable" -BackgroundColor Green -ForegroundColor Black
-       
-        
-     } else {
-      $i | Out-File -FilePath invalid_address.txt -Append
+     } 
+     else 
+     {
+        $domain_dict[$key][$x] | Out-File -FilePath invalid_address.txt -Append
       
-      Write-host "response = $r [$errorstatus] Web Server cannot be reached " -BackgroundColor Red -ForegroundColor Black
-
-     
-
-      }
-   }
+        Write-host "response = $r [$errorstatus] Web Address cannot be reached " -BackgroundColor Red -ForegroundColor Black
+     }
+    }
      # Later on will use the tee-object         
-     Write-host "■ Server www = $i" 
-     if($no_dns){
-     Write-host "■ $dns_host"  
-     } else {
-     Write-Host "■ Location -> Country: $country, Region: $region, City: $city"  
-     Write-Host "■ Hosting Server = $hostingname, Hosting Company = $hostingcompany"   
-     write-host "■ Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
-     if($resp.BaseResponse.RequestMessage.RequestUri.Originalstring -match "http://"){
-     write-host "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)  ¯\_(ツ)_/¯ ekhem no tls?"    
-     } else {
-      write-host "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring) "   
+     Write-host "■ Web Server = $($domain_dict[$key][$x])" 
+     if($no_dns)
+     {
+         Write-host "■ $dns_host"  
+     }
+     else
+     {
+        Write-host "■ $dns_host"
+        Write-Host "■ Location -> Country: $country, Region: $region, City: $city"  
+        Write-Host "■ Hosting Server = $hostingname, Hosting Company = $hostingcompany"   
+        write-host "■ Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
+     if($resp.BaseResponse.RequestMessage.RequestUri.Originalstring -match "http://")
+     {
+        write-host "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)  ¯\_(ツ)_/¯ ekhem no tls?"    
+     }
+     else
+     {
+        write-host "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring) "   
  
      }
-     write-host "■ Error Status code = $errorstatus, Redirected to: $errorrequest "
-     Write-host "=====================================" 
+        write-host "■ Error Status code = $errorstatus, Redirected to: $errorrequest "
+        Write-host "=====================================" 
      }
      Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
-     if ($r -match '^(1|2|3|4|5)0\d$'){
+     if ($r -match '^(1|2|3|4|5)0\d$')
+     {
         Write-Output "HTTP status code: $r " | Out-File -FilePath SCAN.LOG -Append
      } 
      Write-Output "$dns_host" | Out-File -FilePath SCAN.LOG -Append 
-     Write-Output "Server www = $i" | Out-File -FilePath SCAN.LOG -Append 
+     Write-Output "Web Server = $($domain_dict[$key][$x])" | Out-File -FilePath SCAN.LOG -Append 
      Write-Output "Location -> Country: $country, Region: $region, City: $city" | Out-File -FilePath SCAN.LOG -Append   
      Write-Output "Hosting Server = $hostingname, Hosting Company = $hostingcompany" |  Out-File -FilePath SCAN.LOG -Append   
      write-Output "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
@@ -199,7 +195,8 @@ foreach ($a in $domain_list){
      Write-Output "-----------------------------------" | Out-File -FilePath SCAN.LOG -Append
 
    
- }
+    }
+}
 
  $sorted_valid_dom |Select-Object -Unique | Out-File -FilePath VALID_DOMAINS.txt -Append
  $sorted_nx_dom | Select-Object -Unique | Out-File -FilePath NXDOMAIN.txt -Append 
