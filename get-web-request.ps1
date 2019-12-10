@@ -12,7 +12,7 @@ $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='here goes the token'
+$token='here goes your token'
 # AbuseIP API address and key
 $abuseIPurl = 'https://api.abuseipdb.com/api/v2/check'
 $headers = @{
@@ -223,6 +223,8 @@ foreach($key in $domain_dict.Keys)
      }
    
     }
+    Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
+
     Write-Output "■ IP reputation summary from AbuseIPdb.com ■" | Tee-Object -FilePath ./SCAN.LOG -Append
     if ($abuse -eq $null)
     {
@@ -233,8 +235,8 @@ foreach($key in $domain_dict.Keys)
     else
     {
 
-        $abuse.data | Select-Object totalreports,numDistinctUsers,abuseConfidenceScore,lastReportedAt,ipAddress,Countryname | fl
-        Write-Output "Categories : $($abuse.data.reports |
+        write-output $abuse.data | Select-Object totalreports,numDistinctUsers,abuseConfidenceScore,lastReportedAt,ipAddress,Countryname | fl |  Tee-Object -FilePath ./SCAN.LOG -Append 
+        Write-Output "Categories : $($abuse.data.reports | 
         ForEach-Object{ switch($_.categories)
             {
                 
@@ -264,7 +266,6 @@ foreach($key in $domain_dict.Keys)
             } | Select-Object -Unique)"| Tee-Object -FilePath ./SCAN.LOG -Append 
         Write-Output "https://www.abuseipdb.com/check/$IP" | Tee-Object -FilePath ./SCAN.LOG -Append
         
-        Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
         Write-Output "+++++++++++++++++++++++++++++++++++++++++++++" | Tee-Object -FilePath ./SCAN.LOG -Append
     } 
 }
