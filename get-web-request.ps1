@@ -5,18 +5,19 @@ param (
     [Parameter(Mandatory=$false)][bool]$local_proxy=$false
 )
 $OutputEncoding = [ System.Text.Encoding]::UTF8
+$regex_IP="\b(\d{1,3}\.){3}\d{1,3}\b"
 $dns_host=0;
 $domain_dict=@{}
 $sorted_valid_dom=@()
 $sorted_nx_dom=@()
 $proxy_burp="http://127.0.0.1:8080"
 # API token for ipinfo.io
-$token='API token'
+$token='here goes the token'
 # AbuseIP API address and key
 $abuseIPurl = 'https://api.abuseipdb.com/api/v2/check'
 $headers = @{
     Accept= "application/json"
-    Key= "API key"
+    Key= "here goes the key"
 }
 
 
@@ -69,7 +70,35 @@ $agents=@($ie,$opera,$chrome,$safari,$firefox)
 #creating an array inside hashtable {domain_name:(http_address,https_address)}
 foreach ($a in $domain_list)
 {
-   $domain_dict.Add($a,@("http://$a","https://$a"))
+   $trim_a=$a.trim("")
+   $domain_dict.Add($trim_a,@("http://$trim_a","https://$trim_a"))
+}
+
+
+function get-abuse {
+    param (
+        [Parameter(Mandatory=$true)][string]$IP
+    )
+        $body = @{
+            ipAddress= $IP
+            maxAgeInDays= "365"
+            verbose=""
+        }
+        $abuse=Invoke-RestMethod -uri $abuseIPurl -Headers $headers -Body $body -Method get 
+        if($abuse.data.totalReports -le 0){
+            return $null
+        } else {
+            return $abuse
+        } 
+    
+}
+
+function loging {
+    param (
+        [Parameter(Mandatory=$true)][string]$key
+        
+    )
+    
 }
 
 foreach($key in $domain_dict.Keys)
@@ -84,7 +113,7 @@ foreach($key in $domain_dict.Keys)
         $region="N/A"
         $hostingname="N/A"
         $hostingcompany="N/A"
-        $IP=$false
+        $IP=$null
 
 
         for($x=0;$x -lt 2;$x++)
@@ -102,7 +131,7 @@ foreach($key in $domain_dict.Keys)
                 else
                 {
                     $agent=$agents | Get-Random
-                    Invoke-WebRequest -uri $domain_dict[$key][$x] -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck  
+                    Invoke-WebRequest -uri $domain_dict[$key][$x] -UserAgent $agent -TimeoutSec 3 -SkipCertificateCheck 
 
                 }
 
@@ -115,7 +144,8 @@ foreach($key in $domain_dict.Keys)
     
 
         $dns_host=host $key
-        if ( $dns_host -match "NXDOMAIN" -or $dns_host -match "SERVFAIL" -or $dns_host -eq $null)
+
+        if ( ($dns_host -match "NXDOMAIN") -or ($dns_host -match "SERVFAIL") -or ($dns_host -eq $null))
         {
             $no_dns=$true
              
@@ -127,7 +157,7 @@ foreach($key in $domain_dict.Keys)
         else 
         {
      
-            if($IP -ne $false){
+            if($IP -ne $null){
                 $IP=([system.net.dns]::GetHostByName($key)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1
             }
             else
@@ -135,14 +165,10 @@ foreach($key in $domain_dict.Keys)
                 $IP=([system.net.dns]::GetHostByName($key)).AddressList | Select-Object -ExpandProperty ipaddresstostring -First 1  
                 $geo="ipinfo.io/$IP/geo?token=$token"
                 $hosting="ipinfo.io/$IP/json?org?token=$token"
-                $body = @{
-                    ipAddress= $IP
-                    maxAgeInDays= "365"
-                    verbose=""
-                }
-                $abuse=Invoke-RestMethod -uri $abuseIPurl -Headers $headers -Body $body -Method get 
                 $geoinfo=Invoke-RestMethod -uri $geo 
                 $hostingInfo=Invoke-RestMethod -uri $hosting
+                $abuse=get-abuse($IP)
+                
             }   
            
         
@@ -157,94 +183,90 @@ foreach($key in $domain_dict.Keys)
      #$var | select-string "NXDOMAIN" | Out-File -FilePath NXDOMAIN.txt -Append
      $r=$resp | Select-Object  -ExpandProperty statuscode
 
-     if (($r -match '^(1|2|3|4|5)0\d$' -or $r -eq "Unauthorized" -or $r -eq "Forbidden" -or $r -eq "MethodNotAllowed") -and $resp -notmatch "burp")
+     if (($r -match '^(1|2|3|4|5)\d\d$' -or $r -eq "Unauthorized" -or $r -eq "Forbidden" -or $r -eq "MethodNotAllowed") -and $resp -notmatch "burp")
      {
         $domain_dict[$key][$x] | Out-File -FilePath valid_address.txt -Append
         
-        Write-host "response = $r [+] Web Server is reachable" -BackgroundColor Green -ForegroundColor Black
+        Write-Output "■ Response = $r [+] Web Server is reachable" | Tee-Object -FilePath ./SCAN.LOG -Append
      } 
      else 
      {
         $domain_dict[$key][$x] | Out-File -FilePath invalid_address.txt -Append
       
-        Write-host "response = $r [$errorstatus] Web Address cannot be reached " -BackgroundColor Red -ForegroundColor Black
-     }
+        Write-Output "■ Response = $r [$errorstatus] Web Address cannot be reached " | Tee-Object -FilePath ./SCAN.LOG -Append
+     } 
     }
-     # Later on will use the tee-object         
-     Write-host "■ Web Server = $($domain_dict[$key][$x])" 
+
+    
+     Write-Output "■ Web Server = $($domain_dict[$key][$x])" | Tee-Object -FilePath ./SCAN.LOG -Append
      if($no_dns)
      {
-         Write-host "■ $dns_host"  
+         Write-Output "■ $dns_host" | Tee-Object -FilePath ./SCAN.LOG -Append
      }
      else
      {
-        Write-host "■ $dns_host"
-        Write-Host "■ Location -> Country: $country, Region: $region, City: $city"  
-        Write-Host "■ Hosting Server = $hostingname, Hosting Company = $hostingcompany"   
-        write-host "■ Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" 
+        Write-Output "■ $dns_host" | Tee-Object -FilePath ./SCAN.LOG -Append
+        Write-Output "■ Location -> Country: $country, Region: $region, City: $city" | Tee-Object -FilePath ./SCAN.LOG -Append  
+        Write-Output "■ Hosting Server = $hostingname, Hosting Company = $hostingcompany"  | Tee-Object -FilePath ./SCAN.LOG -Append 
+        Write-Output "■ Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" | Tee-Object -FilePath ./SCAN.LOG -Append
      if($resp.BaseResponse.RequestMessage.RequestUri.Originalstring -match "http://")
      {
-        write-host "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)  ¯\_(ツ)_/¯ ekhem no tls?"    
+        Write-Output "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)  ¯\_(ツ)_/¯  no ssl?" | Tee-Object -FilePath ./SCAN.LOG -Append   
      }
      else
      {
-        write-host "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring) "   
+        Write-Output "■ Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring) " | Tee-Object -FilePath ./SCAN.LOG -Append
  
      }
-        write-host "■ Error Status code = $errorstatus, Redirected to: $errorrequest "
-        Write-host "=====================================" 
+        Write-Output "■ Error Status code = $errorstatus, Redirected to: $errorrequest " | Tee-Object -FilePath ./SCAN.LOG -Append
+        Write-Output "=====================================" | Tee-Object -FilePath ./SCAN.LOG -Append
      }
-     Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
-     if ($r -match '^(1|2|3|4|5)0\d$')
-     {
-        Write-Output "HTTP status code: $r " | Out-File -FilePath SCAN.LOG -Append
-     } 
-     Write-Output "$dns_host" | Out-File -FilePath SCAN.LOG -Append 
-     Write-Output "Web Server = $($domain_dict[$key][$x])" | Out-File -FilePath SCAN.LOG -Append 
-     Write-Output "Location -> Country: $country, Region: $region, City: $city" | Out-File -FilePath SCAN.LOG -Append   
-     Write-Output "Hosting Server = $hostingname, Hosting Company = $hostingcompany" |  Out-File -FilePath SCAN.LOG -Append   
-     write-Output "Original domain = $($resp.BaseResponse.RequestMessage.RequestUri.Host)" |Out-File -FilePath SCAN.LOG -Append
-     write-Output "Destination page = $($resp.BaseResponse.RequestMessage.RequestUri.Originalstring)"   | Out-File -FilePath SCAN.LOG -Append     
-     #   Write-Output $var | Out-File -FilePath SCAN.LOG -Append
-     Write-Output $resp.BaseResponse.Headers | Out-File -FilePath SCAN.LOG -Append
-     Write-Output "Error Status code = $errorstatus, Redirected to: $errorrequest " | Out-File -FilePath SCAN.LOG -Append
-     Write-Output "-----------------------------------" | Out-File -FilePath SCAN.LOG -Append
-
    
     }
-    Write-host "Abuse IP summary from AbuseIPdb.com "
-    $abuse.data | select totalreports,numDistinctUsers,abuseConfidenceScore,lastReportedAt,ipAddress,Countryname | fl
-    write-host "Categories : $($abuse.data.reports |
-    ForEach-Object{ switch($_.categories)
-        {
-            
-            
-            3 {"Fraud Orders, "}
-            4 {"DDos, "}
-            5 {"FTP Brute-Force, "}
-            6 {"Ping of Death, "}
-            7 {"Phishing, "}
-            8 {"Fraud VoIP, "}
-            9 {"Open Proxy, "}
-            10 {"Web Spam, "}
-            11 {"Email Spam, "}
-            12 {"Blog Spam, "}
-            13 {"VPN IP, "}
-            14 {"Port Scan, "}
-            15 {"Hacking, "}
-            16 {"SQL Injection, "}
-            17 {"Spoofing, "}
-            18 {"Brute-ForceBad, "}
-            19 {"Bad Web BOT, "}
-            20 {"Exploited Host, "}
-            21 {"Web App Attack, "}
-            22 {"SSH, "}
-            23 {"IOT Attack, "}
-        }
-        } | Select-Object -Unique) "
-    Write-Host "https://www.abuseipdb.com/check/$IP"
-    write-host "+++++++++++++++++++++++++++++++++++++++++++++"
+    Write-Output "■ IP reputation summary from AbuseIPdb.com ■" | Tee-Object -FilePath ./SCAN.LOG -Append
+    if ($abuse -eq $null)
+    {
+        Write-Output "■ No data for $key ᕕ( ᐛ )ᕗ" | Tee-Object -FilePath ./SCAN.LOG -Append
+        Write-Output "+++++++++++++++++++++++++++++++++++++++++++++" | Tee-Object -FilePath ./SCAN.LOG -Append
 
+    }
+    else
+    {
+
+        $abuse.data | Select-Object totalreports,numDistinctUsers,abuseConfidenceScore,lastReportedAt,ipAddress,Countryname | fl
+        Write-Output "Categories : $($abuse.data.reports |
+        ForEach-Object{ switch($_.categories)
+            {
+                
+                
+                3 {",☢  Fraud Orders "}
+                4 {",☢  DDos "}
+                5 {",☢  FTP Brute-Force "}
+                6 {",☢  Ping of Death"}
+                7 {",☢  Phishing"}
+                8 {",☢  Fraud VoIP"}
+                9 {",☢  Open Proxy"}
+                10 {",☢  Web Spam"}
+                11 {",☢  Email Spam"}
+                12 {",☢  Blog Spam"}
+                13 {",☢  VPN IP"}
+                14 {",☢  Port Scan"}
+                15 {",☢  Hacking"}
+                16 {",☢  SQL Injection"}
+                17 {",☢  Spoofing"}
+                18 {",☢  Brute-Force"}
+                19 {",☢  Bad Web BOT"}
+                20 {",☢  Exploited Host"}
+                21 {",☢  Web App Attack"}
+                22 {",☢  SSH"}
+                23 {",☢ IOT Attack"}
+            }
+            } | Select-Object -Unique)"| Tee-Object -FilePath ./SCAN.LOG -Append 
+        Write-Output "https://www.abuseipdb.com/check/$IP" | Tee-Object -FilePath ./SCAN.LOG -Append
+        
+        Write-Output $(Get-Date) | Out-File -FilePath SCAN.LOG -Append
+        Write-Output "+++++++++++++++++++++++++++++++++++++++++++++" | Tee-Object -FilePath ./SCAN.LOG -Append
+    } 
 }
 
  $sorted_valid_dom |Select-Object -Unique | Out-File -FilePath VALID_DOMAINS.txt -Append
