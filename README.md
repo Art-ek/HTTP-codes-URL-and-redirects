@@ -21,6 +21,7 @@ another.domain.org
 ```
 - **web presense** , it will check redirections and show destination page
 - Physical locations **IP geo location added. I'm using ipinfo.io API for geo stuff. To get your free auth token please visit this site**
+- **IP reputation from AbuseIPdb
 - Easy input, paste as many domains as you like and check status codes and redirects in one batch
 - added burp as a proxy so you can see all the GET requests in burp for further scans....
 - script follows redirections (5 by default - can be changed if needed)
