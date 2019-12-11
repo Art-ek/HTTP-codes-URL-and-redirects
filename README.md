@@ -2,6 +2,11 @@
 
 # Bulk GET request to check HTTP status , redirections, http headers and IP location #
 
+Video how it work below.
+
+[![Short video](./screen.png)](https://vimeo.com/378884307 "Vimeo video")
+
+
 Disclaimer, This is a very early beta version and has been created using .NET core and will only run on *NIX* like systems.
 It uses the "host" command which is not on Windows. Soon, will probably add a .NET function to replace it.
 
