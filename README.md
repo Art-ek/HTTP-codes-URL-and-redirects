@@ -2,7 +2,7 @@
 
 # Bulk GET request to check HTTP status , redirections, http headers and IP location #
 
-Video how it work below.
+Video how it works below.
 
 [![Short video](./screen.png)](https://vimeo.com/378884307 "Vimeo video")
 
